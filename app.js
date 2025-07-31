@@ -12,6 +12,11 @@ app.use(express.json());
 let rooms = ['101', '102', '103'];
 let bookings = [];
 
+// ✅ Root route to verify app is running
+app.get('/', (req, res) => {
+  res.send('Room Booking App is Live!');
+});
+
 // Get available rooms
 app.get('/rooms', (req, res) => {
   res.json({ availableRooms: rooms });
@@ -37,3 +42,4 @@ app.get('/bookings', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Room booking app running on port ${PORT}`);
 });
+
