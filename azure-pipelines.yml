@@ -46,3 +46,4 @@ stages:
               azureSubscription: 'roombooking-azure-conn'
               appName: 'roombookingwebapp'
               containers: '$(containerRegistry)/$(imageRepository):$(tag)'
+
