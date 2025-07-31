@@ -4,25 +4,45 @@
 # https://aka.ms/yaml
 
 trigger:
-  - main
-
-pool:
-  vmImage: ubuntu-latest
+  branches:
+    include:
+      - main
 
 variables:
   imageName: 'room-booking-app'
 
-steps:
-- task: Docker@2
-  inputs:
-    containerRegistry: 'roombooking-azure-conn'   # ✅ Your service connection
-    repository: '$(imageName)'
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
-    tags: 'latest'
+stages:
+- stage: Build
+  displayName: Build and Push Docker Image
+  jobs:
+  - job: Build
+    displayName: Build and Push
+    pool:
+      vmImage: 'ubuntu-latest'
 
-- task: AzureWebAppContainer@1
-  inputs:
-    azureSubscription: 'roombooking-azure-conn'   # ✅ Same service connection
-    appName: 'roombookingwebapp'                  # ✅ Your App Service name
-    containers: 'roombookingcr.azurecr.io/room-booking-app:latest'
+    steps:
+    - task: Docker@2
+      displayName: Build and push image to ACR
+      inputs:
+        containerRegistry: 'roombooking-docker-conn'
+        repository: '$(imageName)'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(Build.BuildId)
+
+- stage: Deploy
+  displayName: Deploy to Azure Web App
+  dependsOn: Build
+  jobs:
+  - job: DeployWebApp
+    displayName: Deploy to App Service
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureWebAppContainer@1
+      displayName: Deploy container to Azure Web App
+      inputs:
+        azureSubscription: 'roombooking-azure-conn'
+        appName: 'roombookingwebapp'
+        containers: 'roombookingcr.azurecr.io/room-booking-app:$(Build.BuildId)'
