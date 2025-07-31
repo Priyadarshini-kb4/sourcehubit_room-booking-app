@@ -10,7 +10,7 @@ variables:
   dockerRegistryServiceConnection: 'roombookingcr-docker-conn'  # ← Make sure this matches the new connection name
   imageRepository: 'room-booking-app'
   containerRegistry: 'roombookingcr.azurecr.io'
-  dockerfilePath: 'sourcehubit_room-booking-app/Dockerfile'
+  dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
 
 stages:
