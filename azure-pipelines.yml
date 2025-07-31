@@ -7,13 +7,14 @@ trigger:
 - main
 
 variables:
-  dockerRegistryServiceConnection: 'roombookingcr-docker-conn'
-  imageRepository: 'room-booking-app'
-  containerRegistry: 'roombookingcr.azurecr.io'
-  dockerfilePath: './Dockerfile'
-  tag: '$(Build.BuildId)'
+  dockerRegistryServiceConnection: 'roombookingcr-docker-conn'   # ACR service connection
+  imageRepository: 'room-booking-app'                            # Your image repo name
+  containerRegistry: 'roombookingcr.azurecr.io'                  # Your ACR login server
+  dockerfilePath: 'Dockerfile'                                   # Make sure this matches exactly
+  tag: '$(Build.BuildId)'                                        # Unique tag for each build
 
 stages:
+# ──────────────────────────────
 - stage: BuildAndPush
   displayName: Build and Push Docker Image
   jobs:
@@ -25,8 +26,27 @@ stages:
       displayName: Build and push image to ACR
       inputs:
         command: buildAndPush
-        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'   # ✅ full absolute path
         repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+
+# ──────────────────────────────
+- stage: Deploy
+  displayName: Deploy to Azure Web App
+  dependsOn: BuildAndPush
+  jobs:
+  - deployment: DeployWebApp
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebAppContainer@1
+            displayName: Deploy container to Web App
+            inputs:
+              azureSubscription: 'roombooking-azure-conn'     # Azure service connection for Web App
+              appName: 'roombookingwebapp'                    # Your actual Web App name
+              containers: '$(containerRegistry)/$(imageRepository):$(tag)'
+
