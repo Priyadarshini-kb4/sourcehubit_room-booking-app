@@ -2,7 +2,6 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
-
 trigger:
 - main
 
@@ -10,7 +9,6 @@ variables:
   dockerRegistryServiceConnection: 'roombookingcr-docker-conn'
   imageRepository: 'room-booking-app'
   containerRegistry: 'roombookingcr.azurecr.io'
-  dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
 
 stages:
@@ -25,25 +23,10 @@ stages:
       displayName: Build and push image to ACR
       inputs:
         command: buildAndPush
-        **Dockerfile**: $(dockerfilePath)          # ✅ Use uppercase D here!
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'   # ✅ full absolute path
         repository: $(imageRepository)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
 
-- stage: Deploy
-  displayName: Deploy to Azure Web App
-  dependsOn: BuildAndPush
-  jobs:
-  - deployment: DeployWebApp
-    environment: 'development'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebAppContainer@1
-            inputs:
-              azureSubscription: 'roombooking-azure-conn'
-              appName: 'roombookingwebapp'
-              containers: '$(containerRegistry)/$(imageRepository):$(tag)'
 
