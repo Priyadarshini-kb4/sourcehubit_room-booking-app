@@ -9,6 +9,7 @@ variables:
   dockerRegistryServiceConnection: 'roombookingcr-docker-conn'
   imageRepository: 'room-booking-app'
   containerRegistry: 'roombookingcr.azurecr.io'
+  dockerfilePath: './Dockerfile'
   tag: '$(Build.BuildId)'
 
 stages:
