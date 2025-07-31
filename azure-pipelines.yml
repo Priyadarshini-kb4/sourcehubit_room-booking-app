@@ -7,7 +7,7 @@ trigger:
 - main
 
 variables:
-  dockerRegistryServiceConnection: 'roombookingcr-docker-conn'  # ← Make sure this matches the new connection name
+  dockerRegistryServiceConnection: 'roombookingcr-docker-conn'
   imageRepository: 'room-booking-app'
   containerRegistry: 'roombookingcr.azurecr.io'
   dockerfilePath: 'Dockerfile'
@@ -25,8 +25,8 @@ stages:
       displayName: Build and push image to ACR
       inputs:
         command: buildAndPush
+        **Dockerfile**: $(dockerfilePath)          # ✅ Use uppercase D here!
         repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
@@ -43,6 +43,6 @@ stages:
           steps:
           - task: AzureWebAppContainer@1
             inputs:
-              azureSubscription: 'roombooking-azure-conn'   # ← This is still correct for deploying
+              azureSubscription: 'roombooking-azure-conn'
               appName: 'roombookingwebapp'
               containers: '$(containerRegistry)/$(imageRepository):$(tag)'
