@@ -34,7 +34,7 @@ stages:
   dependsOn: Build
   jobs:
   - deployment: DeployWebApp
-   # environment: 'production'
+   environment: 'production'
     strategy:
       runOnce:
         deploy:
