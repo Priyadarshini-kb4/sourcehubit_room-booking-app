@@ -22,7 +22,7 @@ stages:
     - task: Docker@2
       displayName: Build Docker image
       inputs:
-        containerRegistry: 'roombooking-azure-conn'  # Your service connection name
+        containerRegistry: 'roombookingcr-docker-conn'  # Your service connection name
         repository: '$(imageRepository)'
         command: 'buildAndPush'
         Dockerfile: '$(dockerfilePath)'
