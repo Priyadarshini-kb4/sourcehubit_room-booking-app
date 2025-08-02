@@ -83,3 +83,4 @@ docker build -t room-booking-app .
 
 # Run container
 docker run -p 3000:3000 room-booking-app
+
