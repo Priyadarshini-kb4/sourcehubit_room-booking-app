@@ -2,51 +2,48 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
-
 trigger:
-- main
+- main   # or your branch name
 
 variables:
-  dockerRegistryServiceConnection: 'roombookingcr-docker-conn'   # ACR service connection
-  imageRepository: 'room-booking-app'                            # Your image repo name
-  containerRegistry: 'roombookingcr.azurecr.io'                  # Your ACR login server
-  dockerfilePath: 'Dockerfile'                                   # Make sure this matches exactly
-  tag: '$(Build.BuildId)'                                        # Unique tag for each build
+  imageRepository: 'roombookingwebapp'
+  containerRegistry: 'priyadarshini.azurecr.io'
+  dockerfilePath: 'Dockerfile'
+  tag: '$(Build.BuildId)'
 
 stages:
-# ──────────────────────────────
-- stage: BuildAndPush
-  displayName: Build and Push Docker Image
+- stage: Build
+  displayName: Build image
   jobs:
-  - job: BuildAndPush
+  - job: Build
     pool:
       vmImage: 'ubuntu-latest'
     steps:
     - task: Docker@2
-      displayName: Build and push image to ACR
+      displayName: Build Docker image
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
+        containerRegistry: 'roombooking-azure-conn'  # Your service connection name
+        repository: '$(imageRepository)'
+        command: 'buildAndPush'
+        Dockerfile: '$(dockerfilePath)'
         tags: |
           $(tag)
 
-# ──────────────────────────────
 - stage: Deploy
   displayName: Deploy to Azure Web App
-  dependsOn: BuildAndPush
+  dependsOn: Build
   jobs:
   - deployment: DeployWebApp
-    environment: 'development'
+    environment: 'production'
     strategy:
       runOnce:
         deploy:
           steps:
           - task: AzureWebAppContainer@1
-            displayName: Deploy container to Web App
+            displayName: Deploy to Web App
             inputs:
-              azureSubscription: 'roombooking-azure-conn'     # Azure service connection for Web App
-              appName: 'roombookingwebapp'                    # Your actual Web App name
+              azureSubscription: 'roombooking-azure-conn'  # Your service connection name
+              appName: 'roombookingwebapp'                # Your App Service name
               containers: '$(containerRegistry)/$(imageRepository):$(tag)'
+
 
