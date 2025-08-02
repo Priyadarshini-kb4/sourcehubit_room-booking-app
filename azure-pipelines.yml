@@ -34,7 +34,8 @@ stages:
   dependsOn: Build
   jobs:
   - deployment: DeployWebApp
-   environment: 'production'
+    environment: 
+      name: 'production'    # This matches the environment name you created
     strategy:
       runOnce:
         deploy:
@@ -45,5 +46,4 @@ stages:
               azureSubscription: 'roombooking-azure-conn'  # Your service connection name
               appName: 'roombookingwebapp'                # Your App Service name
               containers: '$(containerRegistry)/$(imageRepository):$(tag)'
-
 
